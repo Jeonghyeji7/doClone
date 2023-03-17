@@ -1,19 +1,17 @@
-import React, {  useState } from 'react';
+import React, {  Children, useState } from 'react';
 import {styled} from '@mui/material';
 import Style from 'ol/style/Style';
 import Stroke from 'ol/style/Stroke';
 import Fill from 'ol/style/Fill';
-import Map from '../components/HdMap';
+import HdMap from '../components/HdMap';
 import { fromLonLat, get } from 'ol/proj';
-import Layers from '../components/layer/Layers';
-import TileLayer from '../components/layer/TileLayer';
-import VectorLayer from '../components/layer/VectorLayer';
 import Controls from '../components/controls/Controls';
 import FullScreenControl from '../components/controls/FullScreenControl';
 import GeoJSON from 'ol/format/GeoJSON';
 import VectorSource from 'ol/source/Vector';
 import OSM from 'ol/source/OSM';
 import mapConfig from "../public/config.json";
+import Layers from '../components/Layers';
 
 const Root = styled('div')(({theme}) => {
     return {
@@ -56,42 +54,11 @@ function Home() {
 
     return (
         <div>
-        <Map center={fromLonLat(center)} zoom={zoom}>
-          <Layers>
-            <TileLayer
-              source={new OSM()}
-              zIndex={0}
-            />
-            {showLayer1 && (
-              <VectorLayer
-                source={new VectorSource({ features: new GeoJSON().readFeatures(geojsonObject, { featureProjection: get('EPSG:3857') }) })}
-                style={styles.MultiPolygon}
-              />
-            )}
-            {showLayer2 && (
-              <VectorLayer
-                source={new VectorSource({ features: new GeoJSON().readFeatures(geojsonObject2, { featureProjection: get('EPSG:3857') }) })}
-                style={styles.MultiPolygon}
-              />
-            )}
-          </Layers>
-          <Controls>
-            <FullScreenControl />
-          </Controls>
-        </Map>
-        <div>
-          <input
-            type="checkbox"
-            checked={showLayer1}
-            onChange={event => setShowLayer1(event.target.checked)}
-          /> Johnson County
-        </div>
-        <div>
-          <input
-            type="checkbox"
-            checked={showLayer2}
-            onChange={event => setShowLayer2(event.target.checked)}
-          /> Wyandotte County</div>
+        <HdMap center={fromLonLat(center)} zoom={zoom}>
+        <Layers/>
+      
+        </HdMap>
+
         </div>
     );
 };

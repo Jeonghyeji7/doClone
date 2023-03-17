@@ -1,3 +1,4 @@
 import React, { createContext } from "react";
-const MapContext = new createContext();
+import {Map} from "ol";
+const MapContext = createContext<Map | null>(null);
 export default MapContext;

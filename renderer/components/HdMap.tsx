@@ -1,29 +1,54 @@
 import React, { useRef, useState, useEffect } from "react"
-
-
-import * as ol from "ol";
+import styles from './HdMap.module.css';
+import CloseIcon from '@mui/icons-material/Close';
+import 'ol/ol.css';
+import { Map, Overlay, View } from 'ol';
 import MapContext from "./context/MapContext";
+import { Box, IconButton } from "@mui/material";
+import TileLayer from "ol/layer/Tile";
+import XYZ from "ol/source/XYZ";
+import OSM from "ol/source/OSM";
+import { fromLonLat, get } from "ol/proj";
+import { defaults as defaultInteraction, DragBox, Modify, Select, Snap, Translate } from 'ol/interaction';
 
-const Map = ({ children, zoom, center }) => {
+const HdMap = ({ children, zoom, center }) => {
     //지도 객체 관련 상태 저장!!
   const mapRef = useRef();
   const [map, setMap] = useState(null);
+  const overlayRef = useRef(null);
+  const [overlay, setOverlay] = useState(null);
+
+  const dellOverlay = function () {
+    overlay?.setPosition(undefined);
+    return false;
+};
 
   // on component mount - 구성요소가 마운트되면 맵개체를 초기화하고 현재 상태로 저장
   // useEffect를 사용하여 컴포넌트가 마운트될 때, ol.Map 객체를 생성하고 지도를 초기화
   useEffect(() => {
-    // options 객체에는 view, layers, controls, overlays 등의 옵션을 설정하고, 
-    //ol.Map 생성자에 이를 전달합니다. mapObject에 생성된 ol.Map 객체를 저장하고, 
     //mapRef.current를 통해 해당 지도를 화면에 출력합니다. 
     //setMap 함수를 사용하여 지도 객체를 상태에 저장합니다.
+    
     let options = {
-      view: new ol.View({ zoom, center }),
+      view: new View({
+        projection: get('EPSG:5186'),
+        center: fromLonLat( 
+          [126.9779228388393, 37.56643948208262], //[경도, 위도] 값 설정! 필자는 시청으로 설정
+          get('EPSG:3857')
+        ),
+        zoom: 15,
+        minZoom: 8,
+        constrainResolution: true,
+      }),
       layers: [],
       controls: [],
-      overlays: []
+      overlays: [],
+      interactions: defaultInteraction({
+        doubleClickZoom: false, keyboard: false,
+    }),
     };
 
-    let mapObject = new ol.Map(options);
+    let mapObject = new Map(options);
     //html 타겟
     mapObject.setTarget(mapRef.current);
 
@@ -49,33 +74,51 @@ const Map = ({ children, zoom, center }) => {
     map.getView().setCenter(center)
   }, [center])
 
+
+
+
+
+
+
+  
+
+  
+
   return (
     // MapContext.Provider 컴포넌트를 사용하여 map 객체를 하위 컴포넌트에서 공유할 수 있도록 합니다. 
     //mapRef를 사용하여 지도를 출력하고, children을 렌더링
-    <MapContext.Provider value={{ map }}>
-      <div ref={mapRef} className="ol-map">
+    <>
+    <MapContext.Provider value={map}>
+      <div ref={mapRef} className="map">
         {children}
       </div>
-      <style jsx>{`
-      .ol-map {
+      <Box className={styles.windowHDMapOverlay} ref={overlayRef} component={'div'} sx={{ padding: '15px' }}>
+                <IconButton onClick={dellOverlay} sx={{ backgroundColor: '#E5E5E5', position: 'absolute', right: '10px', top: '7px', width: '26px', height: '26px', borderRadius: '0' }} >
+                    <CloseIcon fontSize="small" sx={{ fill: '##4A4C55' }} />
+                </IconButton>
+                {/* {content && (
+                    Object.entries(content).map(([attKey, attValue]) => {
+                        return <Typography key={attKey}> {`${attKey} : ${attValue}`} </Typography>
+                    })
+                )} */}
+            </Box >
+      
+    </MapContext.Provider>
+
+    <style jsx>{`
+      .map {
     min-width: 600px;
     min-height: 500px;
-    margin: 50px;
     height: 500px;
     width: "100%";
   }
-  .ol-control {
-    position: absolute;
-    background-color: rgba(255,255,255,0.4);
-    border-radius: 4px;
-    padding: 2px;
-  }
+
   .ol-full-screen {
     top: .5em;
     right: .5em;
   }
         `}</style>
-    </MapContext.Provider>
+    </>
   )
 }
-export default Map;
+export default HdMap;
