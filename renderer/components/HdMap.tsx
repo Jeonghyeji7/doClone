@@ -17,6 +17,7 @@ const HdMap = ({ children, zoom, center }) => {
   const [map, setMap] = useState(null);
   const overlayRef = useRef(null);
   const [overlay, setOverlay] = useState(null);
+  const [content, setContent] = useState(null);
 
   const dellOverlay = function () {
     overlay?.setPosition(undefined);
